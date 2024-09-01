@@ -11,13 +11,8 @@ services:
       - "8000:8000"
     environment:
       - SEARCH_PROVIDER=${SEARCH_PROVIDER:-searxng}
-      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL:-http://searxng:8080}
-
-      - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - SERPER_API_KEY=${SERPER_API_KEY}
-      - BING_API_KEY=${BING_API_KEY}
-
-      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+      - SEARXNG_BASE_URL=${SEARXNG_BASE_URL}
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE}
 
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
@@ -50,8 +45,6 @@ services:
         - action: sync
           path: ./src/backend
           target: /workspace/src/backend
-    networks:
-      - farfalle-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -75,18 +68,6 @@ services:
           target: /app
           ignore:
             - node_modules/
-    networks:
-      - farfalle-network
-
-  searxng:
-    image: docker.io/searxng/searxng:latest
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./searxng:/etc/searxng:rw
-    networks:
-      - farfalle-network
 
   db:
     image: postgres:15.2-alpine
@@ -98,13 +79,4 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_volume:/var/lib/postgresql/data
-    networks:
-      - farfalle-network
-
-networks:
-  farfalle-network:
-    name: farfalle-network
-
-volumes:
-  db_volume:
+      - ${DB_VOL}:/var/lib/postgresql/data
